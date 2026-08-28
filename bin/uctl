@@ -1,0 +1,38 @@
+#!/bin/bash
+
+MODULES_DIR="$HOME/.uctl/modules"
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+show_help() {
+    echo -e "${GREEN}Framework uctl (User Control)${NC}"
+    echo -e "Użycie: uctl <moduł> [argumenty]\n"
+    echo "Dostępne moduły:"
+    
+    if [ -d "$MODULES_DIR" ]; then
+        for module in "$MODULES_DIR"/*.sh; do
+            [ -e "$module" ] || continue
+            basename "$module" .sh | sed 's/^/  - /'
+        done
+    else
+        echo "  (brak zainstalowanych modułów)"
+    fi
+}
+
+MODULE_NAME="$1"
+
+if [ -z "$MODULE_NAME" ] || [ "$MODULE_NAME" == "-h" ] || [ "$MODULE_NAME" == "--help" ]; then
+    show_help
+    exit 0
+fi
+
+MODULE_PATH="$MODULES_DIR/${MODULE_NAME}.sh"
+
+if [ ! -f "$MODULE_PATH" ]; then
+    echo -e "${RED}Błąd: Nieznany moduł '${MODULE_NAME}'${NC}"
+    echo "Stwórz go komendą: uctl edit ${MODULE_NAME}"
+    exit 1
+fi
+
+bash "$MODULE_PATH" "${@:2}"
